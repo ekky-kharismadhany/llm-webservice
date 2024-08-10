@@ -8,6 +8,10 @@ export type CreateDocumentResponse = {
     uuid: string;
 }
 
+export type DeleteDocumentRequest = {
+    uuid: string
+}
+
 export type Document = {
     uuid: string
     sourceTypeId: number
