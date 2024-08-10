@@ -1,6 +1,6 @@
-import { Document } from "./documents.type";
+import { CreateDocumentRequest, Document } from "./documents.type";
 
 export interface IDocumentRepository {
     GetDocuments(): Promise<Document[]>
-    // CreateDocument(request: CreateDocumentRequest): Promise<string>
+    CreateDocument(request: CreateDocumentRequest): Promise<string>
 }

@@ -12,3 +12,5 @@ CREATE TABLE IF NOT EXISTS source_types (
 );
 
 ALTER TABLE documents ADD CONSTRAINT "fk_source_types" FOREIGN KEY ("source_type_id") REFERENCES "source_types"("id");
+
+ALTER TABLE documents ADD CONSTRAINT "unique_source" UNIQUE source;

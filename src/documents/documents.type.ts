@@ -4,6 +4,10 @@ export type CreateDocumentRequest = {
     sourceType: number
 }
 
+export type CreateDocumentResponse = {
+    uuid: string;
+}
+
 export type Document = {
     uuid: string
     sourceTypeId: number
