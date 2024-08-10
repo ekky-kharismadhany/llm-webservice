@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS documents (
+    uuid varchar(256),
+    source_type_id int,
+    source varchar(1024),
+    PRIMARY KEY ("uuid")
+);
+
+CREATE TABLE IF NOT EXISTS source_types (
+    id SERIAL,
+    name varchar(64),
+    PRIMARY KEY ("id")
+);
+
+ALTER TABLE documents ADD CONSTRAINT "fk_source_types" FOREIGN KEY ("source_type_id") REFERENCES "source_types"("id");
