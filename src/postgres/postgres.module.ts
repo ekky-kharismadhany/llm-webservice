@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { Pool } from 'pg';
+import { Pgvector } from './pgvector/pgvector.service';
 
 @Global()
 @Module({
@@ -12,8 +13,9 @@ import { Pool } from 'pg';
                 database: "llm_vector_db",
                 port: 5432
             }),
-        }
+        },
+        Pgvector
     ],
-    exports: ["DATABASE_POOL"]
+    exports: ["DATABASE_POOL", Pgvector]
 })
 export class PostgresModule { }

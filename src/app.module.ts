@@ -7,9 +7,10 @@ import { DocumentsService } from './documents/documents.service';
 import { DocumentsModule } from './documents/documents.module';
 import { EmbeddingModule } from './embedding/embedding.module';
 import { BullmqModule } from './bullmq/bullmq.module';
+import { LangchainModule } from './langchain/langchain.module';
 
 @Module({
-  imports: [PostgresModule, DocumentsModule, EmbeddingModule, BullmqModule],
+  imports: [PostgresModule, DocumentsModule, EmbeddingModule, BullmqModule, LangchainModule],
   controllers: [AppController, DocumentsController],
   providers: [AppService, DocumentsService],
 })

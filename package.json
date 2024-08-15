@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@langchain/community": "^0.2.25",
-    "@langchain/ollama": "^0.0.4",
+    "@langchain/ollama": "^0.0.2",
     "@langchain/openai": "^0.2.6",
     "@nestjs/bullmq": "^10.2.0",
     "@nestjs/common": "^10.0.0",
@@ -29,6 +29,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@types/uuid": "^10.0.0",
     "bullmq": "^5.12.3",
+    "cheerio": "^1.0.0",
     "langchain": "^0.2.14",
     "pg": "^8.12.0",
     "reflect-metadata": "^0.2.0",
