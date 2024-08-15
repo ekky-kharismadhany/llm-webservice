@@ -10,8 +10,14 @@ import { BullmqModule } from './bullmq/bullmq.module';
 import { LangchainModule } from './langchain/langchain.module';
 
 @Module({
-  imports: [PostgresModule, DocumentsModule, EmbeddingModule, BullmqModule, LangchainModule],
+  imports: [
+    PostgresModule,
+    DocumentsModule,
+    EmbeddingModule,
+    BullmqModule,
+    LangchainModule,
+  ],
   controllers: [AppController, DocumentsController],
   providers: [AppService, DocumentsService],
 })
-export class AppModule { }
+export class AppModule {}

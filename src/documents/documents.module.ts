@@ -4,8 +4,8 @@ import { DocumentRepository } from './documents.repository';
 import { DocumentsController } from './documents.controller';
 
 @Module({
-    controllers: [DocumentsController],
-    providers: [DocumentsService, DocumentRepository],
-    exports: [DocumentRepository]
+  controllers: [DocumentsController],
+  providers: [DocumentsService, DocumentRepository],
+  exports: [DocumentRepository],
 })
-export class DocumentsModule { }
+export class DocumentsModule {}

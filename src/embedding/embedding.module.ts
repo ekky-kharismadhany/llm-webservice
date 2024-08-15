@@ -9,6 +9,11 @@ import { Pgvector } from 'src/postgres/pgvector/pgvector.service';
 @Module({
   imports: [BullmqModule],
   controllers: [EmbeddingController],
-  providers: [EmbeddingService, EmbeddingRepository, EmbeddingConsumer, Pgvector],
+  providers: [
+    EmbeddingService,
+    EmbeddingRepository,
+    EmbeddingConsumer,
+    Pgvector,
+  ],
 })
-export class EmbeddingModule { }
+export class EmbeddingModule {}

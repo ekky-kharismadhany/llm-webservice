@@ -1,24 +1,24 @@
 // TODO: add field to handle pdf or other source
 export type CreateDocumentRequest = {
-    source: string
-    sourceType: number
-}
+  source: string;
+  sourceType: number;
+};
 
 export type CreateDocumentResponse = {
-    uuid: string;
-}
+  uuid: string;
+};
 
 export type DeleteDocumentRequest = {
-    uuid: string
-}
+  uuid: string;
+};
 
 export type Document = {
-    uuid: string
-    sourceTypeId: number
-    source: string
-}
+  uuid: string;
+  sourceTypeId: number;
+  source: string;
+};
 
 export type SourceType = {
-    id: number
-    name: string
-}
+  id: number;
+  name: string;
+};
