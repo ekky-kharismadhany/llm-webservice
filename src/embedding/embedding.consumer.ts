@@ -6,43 +6,24 @@ import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "langchain/document";
 import { v4 as uuidv4 } from "uuid";
-import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
-import { PGVectorStore, PGVectorStoreArgs } from "@langchain/community/vectorstores/pgvector";
+import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
+import { Pgvector } from "src/postgres/pgvector/pgvector.service";
 
 type DocumentPromise = Promise<Document<Record<string, any>>[][]>
 
 @Processor("EMBEDDING_QUEUE")
 export class EmbeddingConsumer extends WorkerHost {
     constructor(
-        @Inject("OLLAMA_EMBEDDING_ADAPTER") private embedding: EmbeddingsInterface
+        @Inject("OLLAMA_EMBEDDING_ADAPTER") private embedding: EmbeddingsInterface,
+        private pgVector: Pgvector
     ) {
         super();
     }
     private logger = new Logger(EmbeddingConsumer.name, { timestamp: true });
-    private config: PGVectorStoreArgs = {
-        tableName: "vector_table",
-        postgresConnectionOptions: {
-            host: "localhost",
-            port: 5432,
-            user: "user",
-            password: "password",
-            database: "llm_vector_db"
-        },
-        columns: {
-            idColumnName: "id",
-            vectorColumnName: "vector",
-            contentColumnName: "content",
-            metadataColumnName: "metadata",
-        },
-        distanceStrategy: "cosine",
-        verbose: true,
-
-    }
     async process(job: Job<any, any, string>): Promise<any> {
         this.logger.verbose(`job with name ${job.name} is working`);
         const document = await this.loadDocumentFromSources([job.data.source]);
-        this.logger.verbose(`try to insert to vector db. Document: ${document}`);
-        const pgVector = await this.createPgVectorStorageWithOllama(this.embedding)
+        const pgVector = await this.pgVector.createPgVectorStorage(this.embedding)
         await this.insertDocumentToPgVector(document, pgVector)
         return {};
     }
@@ -90,26 +71,5 @@ export class EmbeddingConsumer extends WorkerHost {
             this.logger.error("Error inserting vector: ", error);
         }
         this.logger.verbose("insert vector complete")
-    }
-
-    createOllamaEmbedding() {
-        try {
-            const embeddings = new OllamaEmbeddings({
-                baseUrl: "http://localhost:11434",
-                model: "all-minilm",
-            })
-            return embeddings;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async createPgVectorStorageWithOllama(embeddings: EmbeddingsInterface) {
-        try {
-            const pgVectorStorage = await PGVectorStore.initialize(embeddings, this.config);
-            return pgVectorStorage
-        } catch (error) {
-            throw error;
-        }
     }
 }
