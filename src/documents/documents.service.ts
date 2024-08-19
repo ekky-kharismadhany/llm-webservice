@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { DocumentRepository } from './documents.repository';
+import { Injectable } from "@nestjs/common";
+import { DocumentRepository } from "./documents.repository";
 import {
   CreateDocumentRequest,
   DeleteDocumentRequest,
   Document,
-} from './documents.type';
+} from "./documents.type";
 
 @Injectable()
 export class DocumentsService {

@@ -1,20 +1,20 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Inject, Logger } from '@nestjs/common';
-import { Job } from 'bullmq';
-import type { EmbeddingsInterface } from '@langchain/core/embeddings';
-import { CheerioWebBaseLoader } from '@langchain/community/document_loaders/web/cheerio';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { Document } from 'langchain/document';
-import { v4 as uuidv4 } from 'uuid';
-import { PGVectorStore } from '@langchain/community/vectorstores/pgvector';
-import { Pgvector } from 'src/postgres/pgvector/pgvector.service';
+import { Processor, WorkerHost } from "@nestjs/bullmq";
+import { Inject, Logger } from "@nestjs/common";
+import { Job } from "bullmq";
+import type { EmbeddingsInterface } from "@langchain/core/embeddings";
+import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { Document } from "langchain/document";
+import { v4 as uuidv4 } from "uuid";
+import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
+import { Pgvector } from "src/postgres/pgvector/pgvector.service";
 
 type DocumentPromise = Promise<Document<Record<string, any>>[][]>;
 
-@Processor('EMBEDDING_QUEUE')
+@Processor("EMBEDDING_QUEUE")
 export class EmbeddingConsumer extends WorkerHost {
   constructor(
-    @Inject('OLLAMA_EMBEDDING_ADAPTER') private embedding: EmbeddingsInterface,
+    @Inject("OLLAMA_EMBEDDING_ADAPTER") private embedding: EmbeddingsInterface,
     private pgVector: Pgvector,
   ) {
     super();
@@ -40,7 +40,7 @@ export class EmbeddingConsumer extends WorkerHost {
       });
       const allSplits = await textSplitter.splitDocuments(docs);
       allSplits.map((split) => {
-        if (!split.pageContent.includes('function')) {
+        if (!split.pageContent.includes("function")) {
           filteredSplit.push(split);
         }
       });
@@ -73,8 +73,8 @@ export class EmbeddingConsumer extends WorkerHost {
       await PgVector.addDocuments(documentList, { ids: ids });
       await PgVector.end();
     } catch (error) {
-      this.logger.error('Error inserting vector: ', error);
+      this.logger.error("Error inserting vector: ", error);
     }
-    this.logger.verbose('insert vector complete');
+    this.logger.verbose("insert vector complete");
   }
 }

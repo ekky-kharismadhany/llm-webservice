@@ -2,7 +2,7 @@ import {
   CreateDocumentRequest,
   DeleteDocumentRequest,
   Document,
-} from './documents.type';
+} from "./documents.type";
 
 export interface IDocumentRepository {
   getDocuments(): Promise<Document[]>;
