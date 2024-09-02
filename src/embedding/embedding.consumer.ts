@@ -7,7 +7,7 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "langchain/document";
 import { v4 as uuidv4 } from "uuid";
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
-import { Pgvector } from "src/postgres/pgvector/pgvector.service";
+import { Pgvector } from "src/langchain/pgvector/pgvector.service";
 
 type DocumentPromise = Promise<Document<Record<string, any>>[][]>;
 
@@ -40,7 +40,19 @@ export class EmbeddingConsumer extends WorkerHost {
       });
       const allSplits = await textSplitter.splitDocuments(docs);
       allSplits.map((split) => {
-        if (!split.pageContent.includes("function")) {
+        const cssRegex = /(?:^|\s)(\.|#)[a-zA-Z_][a-zA-Z0-9_-]*\s*\{/; // Regex to match CSS class or ID selectors
+        const jsCodeRegex =
+          /(let|const|var|if|else|function|\=\=|\=\>|\{\}|\$\(|\.find\()/;
+        const content = split.pageContent
+          .replace(/\n/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        split.pageContent = content;
+        if (
+          !content.includes("function") &&
+          !cssRegex.test(content) &&
+          !jsCodeRegex.test(content)
+        ) {
           filteredSplit.push(split);
         }
       });

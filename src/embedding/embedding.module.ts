@@ -4,7 +4,7 @@ import { EmbeddingService } from "./embedding.service";
 import { EmbeddingRepository } from "./embedding.repository";
 import { BullmqModule } from "src/bullmq/bullmq.module";
 import { EmbeddingConsumer } from "./embedding.consumer";
-import { Pgvector } from "src/postgres/pgvector/pgvector.service";
+import { Pgvector } from "src/langchain/pgvector/pgvector.service";
 
 @Module({
   imports: [BullmqModule],
