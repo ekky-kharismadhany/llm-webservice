@@ -4,7 +4,7 @@ import { EmbeddingService } from "./embedding.service";
 import { EmbeddingRepository } from "./embedding.repository";
 import { BullmqModule } from "src/bullmq/bullmq.module";
 import { EmbeddingConsumer } from "./embedding.consumer";
-import { Pgvector } from "src/langchain/pgvector/pgvector.service";
+import { PgvectorService } from "src/langchain/pgvector/pgvector.service";
 
 @Module({
   imports: [BullmqModule],
@@ -13,7 +13,7 @@ import { Pgvector } from "src/langchain/pgvector/pgvector.service";
     EmbeddingService,
     EmbeddingRepository,
     EmbeddingConsumer,
-    Pgvector,
+    PgvectorService,
   ],
 })
 export class EmbeddingModule {}

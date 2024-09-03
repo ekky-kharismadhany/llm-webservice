@@ -7,7 +7,7 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "langchain/document";
 import { v4 as uuidv4 } from "uuid";
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
-import { Pgvector } from "src/langchain/pgvector/pgvector.service";
+import { PgvectorService } from "src/langchain/pgvector/pgvector.service";
 
 type DocumentPromise = Promise<Document<Record<string, any>>[][]>;
 
@@ -15,7 +15,7 @@ type DocumentPromise = Promise<Document<Record<string, any>>[][]>;
 export class EmbeddingConsumer extends WorkerHost {
   constructor(
     @Inject("OLLAMA_EMBEDDING_ADAPTER") private embedding: EmbeddingsInterface,
-    private pgVector: Pgvector,
+    private pgVector: PgvectorService,
   ) {
     super();
   }
