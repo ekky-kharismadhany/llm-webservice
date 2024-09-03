@@ -1,7 +1,7 @@
 import { Global, Module, Provider } from "@nestjs/common";
 import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
 import { ChatOllama } from "@langchain/ollama";
-import { PgvectorService } from './pgvector/pgvector.service';
+import { PgvectorService } from "./pgvector/pgvector.service";
 
 const ollamaEmbeddingAdapter: Provider = {
   provide: "OLLAMA_EMBEDDING_ADAPTER",

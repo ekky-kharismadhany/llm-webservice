@@ -1,36 +1,38 @@
 import { ChatOllama } from "@langchain/ollama";
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { Pgvector } from "src/postgres/pgvector/pgvector.service";
-import type { EmbeddingsInterface } from "@langchain/core/embeddings";
-import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
-import { PromptTemplate } from "@langchain/core/prompts";
+import { PromptTemplate, FewShotPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { Readable } from "stream";
 import {
   GenerativeCompleteResponse,
   GenerativeResponse,
 } from "./generative.type";
+import { DataSource } from "typeorm";
+import { answerPromptTemplate, fewShotPrompTempate, fewShotSqlExample } from "./generative.constant";
+import { SqlDatabase } from "langchain/sql_db";
+import { createSqlQueryChain } from "langchain/chains/sql_db";
+import {
+  RunnablePassthrough,
+  RunnableSequence,
+} from "@langchain/core/runnables";
+import { QuerySqlTool } from "langchain/tools/sql";
 
 @Injectable()
 export class GenerativeRepository {
   private logger = new Logger(GenerativeRepository.name);
   constructor(
-    private pgVectorService: Pgvector,
     @Inject("OLLAMA_CHAT_ADAPTER") private chatAdapter: ChatOllama,
-    @Inject("OLLAMA_EMBEDDING_ADAPTER")
-    private embeddingAdapter: EmbeddingsInterface,
+    @Inject("TYPEORM_ADAPTER") private datasource: DataSource,
   ) {}
 
   async generateChat(question: string) {
-    const pgvector = await this.pgVectorService.createPgVectorStorage(
-      this.embeddingAdapter,
-    );
-    const docs = await pgvector.similaritySearch(question);
-    this.logger.verbose(`found ${docs.length} to support large language model`);
-    const chain = await this.createChain(question);
-    const response = await chain.stream({
-      context: docs,
+    const db = await SqlDatabase.fromDataSourceParams({
+      appDataSource: this.datasource,
     });
+    const sqlPrompt = await this.createSqlPrompt(db, question);
+    const sqlChain = await this.createSqlChain(sqlPrompt, db, question)
+    const answerChainWithSql = this.createAnswerWithSqlChain(db, sqlChain)
+    const response = await answerChainWithSql.stream({question: question});
     return new Readable({
       async read() {
         try {
@@ -65,28 +67,58 @@ export class GenerativeRepository {
     });
   }
 
-  private createPrompt(question: string) {
-    return PromptTemplate.fromTemplate(`${question}: {context}`);
-  }
-
-  private createChain(question: string) {
-    return createStuffDocumentsChain({
-      llm: this.chatAdapter,
-      prompt: this.createPrompt(question),
-      outputParser: new StringOutputParser(),
+  private async createSqlPrompt(db: SqlDatabase ,question: string) {
+    const tableInfo = await db.getTableInfo(["places", "place_types"]);
+    this.logger.log(tableInfo)
+    const prompt = PromptTemplate.fromTemplate(
+      `Input pengguna: {input} \n kueri: {query}`,
+    );
+    const fewShotPrompt = new FewShotPromptTemplate({
+      examples: fewShotSqlExample,
+      examplePrompt: prompt,
+      prefix: fewShotPrompTempate,
+      suffix: "Input pengguna: {input} \n kueri: ",
+      inputVariables: ["input", "top_k", "table_info"],
     });
+    await fewShotPrompt.format({
+      input: question,
+      top_k: 3,
+      table_info: tableInfo,
+    });
+    return fewShotPrompt
   }
 
-  private createResponse(val: string): GenerativeResponse {
-    const date = new Date();
-    return {
-      created_at: date.toUTCString(),
-      done: false,
-      message: {
-        content: val,
-        role: "assistant",
-      },
-      model: "mistral",
-    };
+  private async createSqlChain(prompt: FewShotPromptTemplate, db: SqlDatabase, question: string) {
+    const chain = await createSqlQueryChain({
+      db: db,
+      dialect: "postgres",
+      llm: this.chatAdapter,
+      prompt: prompt
+    });
+    const result = await chain.invoke({
+      question: question
+    })
+    return result;
+  }
+
+  private createAnswerWithSqlChain(db: SqlDatabase, sqlQuery: string) {
+    const answerPrompt = PromptTemplate.fromTemplate(answerPromptTemplate);
+    const answerChain =   answerPrompt.pipe(this.chatAdapter).pipe(new StringOutputParser());
+    const runnableChain = RunnableSequence.from([
+      RunnablePassthrough.assign({
+        result: () => {
+          try {            
+            this.logger.log(sqlQuery);
+            const r = new QuerySqlTool(db).invoke(sqlQuery)
+            r.then(res => this.logger.log(res))
+            return r;
+          } catch(e: unknown) {
+            this.logger.error(e)
+            return ""
+          }
+        }
+      }), answerChain
+    ]);
+    return runnableChain;
   }
 }
